@@ -7,13 +7,9 @@ import {
     AlertDialogFooter,
     AlertDialogHeader,
     AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+} from "@/components/ui";
+import type { DeleteDialogProps } from "@/types";
 
-interface DeleteDialogProps {
-    isOpen: boolean;
-    onClose: () => void;
-    onConfirm: () => void;
-}
 
 export const DeleteDialog = ({ isOpen, onClose, onConfirm }: DeleteDialogProps) => {
     return (

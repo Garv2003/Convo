@@ -1,29 +1,23 @@
 import { LogOut, User } from "lucide-react"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
-  DropdownMenu,
+  Avatar, AvatarFallback, AvatarImage, DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import {
-  Tooltip,
+  DropdownMenuTrigger, Tooltip,
   TooltipContent,
   TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
-import { Models } from "appwrite"
+  TooltipTrigger
+} from "@/components/ui"
+import type { Models } from "@/appwrite/config"
 import { account } from "@/appwrite/config"
 import { useEffect, useState } from "react"
+import { useLogout } from "@/hooks"
 
-interface UserNavProps {
-  onLogout?: () => void
-}
-
-export function UserNav({ onLogout }: UserNavProps) {
+export function UserNav() {
   const [user, setUser] = useState<Models.User<Models.Preferences> | null>(null)
+  const { logoutUser } = useLogout()
 
   useEffect(() => {
     const getUser = async () => {
@@ -53,22 +47,36 @@ export function UserNav({ onLogout }: UserNavProps) {
                         </Avatar>
                       </div>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent className="w-56" align="end" forceMount>
+                    <DropdownMenuContent className="w-80" align="end" forceMount>
                       <DropdownMenuLabel className="font-normal">
-                        <div className="flex flex-col space-y-1">
-                          <p className="text-sm font-medium leading-none">{user?.name || "User"}</p>
-                          <p className="text-xs leading-none text-muted-foreground">
-                            {user?.email || "user@example.com"}
-                          </p>
+                        <div className="flex items-center space-x-4 pb-3">
+                          <div className="space-y-2">
+                            <p className="text-lg font-semibold leading-none">{user?.name || "User"}</p>
+                            <p className="text-sm text-muted-foreground">
+                              {user?.email || "user@example.com"}
+                            </p>
+                            <div className="flex items-center text-xs text-muted-foreground">
+                              <span className="flex items-center">
+                                Member since: {" "}
+                                {user?.$createdAt
+                                  ? new Date(user.$createdAt).toLocaleString("en-US", {
+                                    month: "long",
+                                    day: "numeric",
+                                    year: "numeric",
+                                  })
+                                  : "2023-08-26"}
+                              </span>
+                            </div>
+                          </div>
                         </div>
                       </DropdownMenuLabel>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem
-                        className="text-red-600 focus:text-red-600 cursor-pointer"
-                        onClick={onLogout}
+                        className="text-red-600 focus:text-red-600 cursor-pointer py-3"
+                        onClick={logoutUser}
                       >
-                        <LogOut className="mr-2 h-4 w-4" />
-                        <span>Log out</span>
+                        <LogOut className="mr-3 h-5 w-5" />
+                        <span className="font-medium">Log out</span>
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
@@ -84,7 +92,7 @@ export function UserNav({ onLogout }: UserNavProps) {
           <Tooltip>
             <TooltipTrigger asChild>
               <div
-                onClick={onLogout}
+                onClick={logoutUser}
                 className="text-muted-foreground hover:text-red-600 transition-colors cursor-pointer"
               >
                 <LogOut className="h-5 w-5" />

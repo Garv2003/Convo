@@ -1,10 +1,4 @@
-import { FormEvent } from 'react';
-
-interface MessageInputProps {
-    newMessage: string;
-    onMessageChange: (message: string) => void;
-    onSubmit: (e: FormEvent) => void;
-}
+import type { MessageInputProps } from "@/types";
 
 export const MessageInput = ({ newMessage, onMessageChange, onSubmit }: MessageInputProps) => {
     return (

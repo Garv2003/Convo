@@ -1,11 +1,6 @@
 import { memo } from 'react';
-import { User } from '../types';
-import { formatLastSeen } from './utils';
-
-interface UserItemProps {
-    user: User;
-    onClick: (user: User) => void;
-}
+import { UserItemProps } from '@/types';
+import { formatLastSeen } from '@/utils/utils';
 
 const UserItemComponent = ({ user, onClick }: UserItemProps) => (
     <div
@@ -35,7 +30,5 @@ const UserItemComponent = ({ user, onClick }: UserItemProps) => (
         </div>
     </div>
 );
-
-UserItemComponent.displayName = 'UserItem';
 
 export const UserItem = memo(UserItemComponent);

@@ -1,20 +1,13 @@
 import { useState } from 'react';
+import { UserListProps } from '@/types';
+import { useUsers, useUserStatus } from '@/hooks';
+import { SearchBar, UserItem } from '@/components/custom';
 import '@/styles/scrollbar.css';
-import { User } from './types';
-import { useUsers } from './user/hooks/useUsers';
-import { useUserStatus } from './user/hooks/useUserStatus';
-import { SearchBar } from './user/SearchBar';
-import { UserItem } from './user/UserItem';
-
-interface UserListProps {
-    onUserSelect: (user: User) => void;
-    selectedUser: User | null;
-}
 
 export const UserList = ({ onUserSelect, selectedUser }: UserListProps) => {
     const [searchQuery, setSearchQuery] = useState('');
-    const { users } = useUsers(selectedUser,onUserSelect);
-    useUserStatus();    
+    const { users, isLoading } = useUsers(selectedUser, onUserSelect);
+    useUserStatus();
 
     const filteredUsers = users.filter(
         user =>
@@ -33,7 +26,15 @@ export const UserList = ({ onUserSelect, selectedUser }: UserListProps) => {
                 </div>
                 <div className="flex-1 overflow-y-auto p-2 custom-scrollbar">
                     <div className="space-y-2">
-                        {filteredUsers.length === 0 ? (
+                        {isLoading ? (
+                            <div className="h-full flex flex-col items-center justify-center min-h-[80vh] py-8 space-y-4">
+                                <div className="relative size-12">
+                                    <div className="absolute inset-0 rounded-full border-4 border-muted-foreground/20"></div>
+                                    <div className="absolute inset-0 rounded-full border-4 border-primary border-l-transparent animate-spin"></div>
+                                </div>
+                                <p className="text-sm text-muted-foreground">Loading users...</p>
+                            </div>
+                        ) : filteredUsers.length === 0 ? (
                             <p className="text-sm text-muted-foreground text-center">No users found</p>
                         ) : (
                             filteredUsers.map((user) => (

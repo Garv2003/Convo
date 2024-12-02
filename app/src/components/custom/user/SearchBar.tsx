@@ -1,9 +1,5 @@
 import { memo } from 'react';
-
-interface SearchBarProps {
-    value: string;
-    onChange: (value: string) => void;
-}
+import type { SearchBarProps } from "@/types"
 
 export const SearchBar = memo(({ value, onChange }: SearchBarProps) => (
     <div className="relative">

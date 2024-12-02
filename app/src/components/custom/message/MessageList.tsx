@@ -1,23 +1,16 @@
-import { Message, User } from "../types";
-import { MessageItem } from "./Message";
+import type { MessageListProps } from "@/types";
+import { MessageItem } from "@/components/custom";
 
-interface MessageListProps {
-    messages: Message[];
-    selectedUser: User;
-    onCopyMessage: (content: string) => void;
-    onDeleteMessage: (message: Message) => void;
-    messagesEndRef: React.RefObject<HTMLDivElement>;
-    currentUser: User;
-}
-
-export const MessageList = ({ 
-    messages, 
-    selectedUser, 
-    onCopyMessage, 
+export const MessageList = ({
+    messages,
+    selectedUser,
+    onCopyMessage,
     onDeleteMessage,
-    messagesEndRef ,
-    currentUser
+    messagesEndRef,
+    currentUser,
+    onEditMessage
 }: MessageListProps) => {
+
     return (
         <div className="flex-1 overflow-y-auto p-6 custom-scrollbar">
             <div className="space-y-4">
@@ -32,6 +25,7 @@ export const MessageList = ({
                             }
                             onCopy={onCopyMessage}
                             onDelete={onDeleteMessage}
+                            onEdit={(event, message) => onEditMessage?.(event, message)}
                         />
                     );
                 })}

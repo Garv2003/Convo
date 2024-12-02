@@ -1,11 +1,7 @@
-import { User } from "../types";
-
-interface MessageHeaderProps {
-    user: User;
-}
+import { MessageHeaderProps } from "@/types";
 
 export const MessageHeader = ({ user }: MessageHeaderProps) => {
-    
+
     return (
         <div className="space-y-1.5 p-6 flex flex-row items-center border-b">
             <div className="flex items-center space-x-4">
@@ -18,11 +14,10 @@ export const MessageHeader = ({ user }: MessageHeaderProps) => {
                     <p className="text-sm font-medium leading-none">{user.name}</p>
                     <p className="text-sm text-muted-foreground">{user.email}</p>
                 </div>
-                <span className={`ml-2 inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${
-                    user.status === 'online' 
-                        ? 'bg-green-50 text-green-700 ring-1 ring-inset ring-green-600/20' 
+                <span className={`ml-2 inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${user.status === 'online'
+                        ? 'bg-green-50 text-green-700 ring-1 ring-inset ring-green-600/20'
                         : 'bg-gray-50 text-gray-600 ring-1 ring-inset ring-gray-500/20'
-                }`}>
+                    }`}>
                     {user.status === 'online' ? 'Online' : 'Offline'}
                 </span>
             </div>

@@ -1,70 +1,35 @@
-import { Button } from "@/components/ui/button"
 import {
+    Button,
     Card,
     CardContent,
     CardDescription,
     CardFooter,
     CardHeader,
     CardTitle,
-} from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Link } from "react-router-dom"
-import { toast } from "sonner"
-import { Query } from "appwrite"
-import { account, databases, COLLECTION_ID_USERS, DATABASE_ID } from "../appwrite/config"
-import z from "zod"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useNavigate } from "react-router-dom"
-import { useMutation } from "@tanstack/react-query"
+    Input,
+    Label
+} from "@/components/ui";
+import { Link } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { loginSchema } from "@/schema";
+import { useLogin } from "@/hooks/useLogin";
+import { z } from "zod";
 
 export function Login() {
-    const navigate = useNavigate()
-
-    const loginSchema = z.object({
-        email: z.string().email("Invalid email"),
-        password: z.string().min(6, "Password must be at least 6 characters")
-    })
-
     const {
         register,
         handleSubmit,
         formState: { errors },
     } = useForm<z.infer<typeof loginSchema>>({
         resolver: zodResolver(loginSchema)
-    })
+    });
 
-    const { mutate: login, isPending } = useMutation({
-        mutationFn: async ({ email, password }: z.infer<typeof loginSchema>) => {
-            await account.createEmailPasswordSession(email, password)
-            const currentUser = await account.get()
-            await databases.updateDocument(
-                DATABASE_ID,
-                COLLECTION_ID_USERS,
-                currentUser.$id,
-                {
-                    status: 'online',
-                    lastSeen: new Date().toISOString(),
-                    lastPing: new Date().toISOString(),
-                }
-            )
-        },
-        onSuccess: () => {
-            toast.success("Login successful!", {
-                description: "You are now logged in."
-            })
-            navigate("/")
-        },
-        onError: () => {
-            toast.error("Invalid email or password")
-        }
-    })
+    const { login, isPending } = useLogin();
 
     const handleLogin = handleSubmit(({ email, password }) => {
-        login({ email, password })
-    })
-
+        login({ email, password });
+    });
 
     return (
         <div className="flex min-h-screen items-center justify-center">
@@ -106,8 +71,7 @@ export function Login() {
                         Login
                     </Button>
                 </CardFooter>
-
             </Card>
         </div>
-    )
+    );
 }
