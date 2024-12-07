@@ -1,6 +1,7 @@
 import { MessageHeaderProps } from "@/types";
 
-export const MessageHeader = ({ user }: MessageHeaderProps) => {
+export const MessageHeader = ({ user, isTyping }: MessageHeaderProps) => {
+    console.log(user, isTyping);    
 
     return (
         <div className="space-y-1.5 p-6 flex flex-row items-center border-b">
@@ -12,11 +13,22 @@ export const MessageHeader = ({ user }: MessageHeaderProps) => {
                 </div>
                 <div>
                     <p className="text-sm font-medium leading-none">{user.name}</p>
-                    <p className="text-sm text-muted-foreground">{user.email}</p>
+                    <p className="text-sm text-muted-foreground">
+                        {isTyping ? (
+                            <span className="flex items-center gap-1">
+                                <span>typing</span>
+                                <span className="flex space-x-1">
+                                    <span className="animate-bounce">.</span>
+                                    <span className="animate-bounce" style={{ animationDelay: '0.2s' }}>.</span>
+                                    <span className="animate-bounce" style={{ animationDelay: '0.4s' }}>.</span>
+                                </span>
+                            </span>
+                        ) : user.email}
+                    </p>
                 </div>
                 <span className={`ml-2 inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${user.status === 'online'
-                        ? 'bg-green-50 text-green-700 ring-1 ring-inset ring-green-600/20'
-                        : 'bg-gray-50 text-gray-600 ring-1 ring-inset ring-gray-500/20'
+                    ? 'bg-green-50 text-green-700 ring-1 ring-inset ring-green-600/20'
+                    : 'bg-gray-50 text-gray-600 ring-1 ring-inset ring-gray-500/20'
                     }`}>
                     {user.status === 'online' ? 'Online' : 'Offline'}
                 </span>

@@ -1,11 +1,11 @@
 import { useState, FormEvent, useRef, useEffect } from 'react';
 import { MessageHeader, MessageList, MessageInput, DeleteDialog } from '@/components/custom';
-import { client, COLLECTION_ID_MESSAGES, DATABASE_ID, account } from '@/appwrite/config';
-import type { Message, User, MessageBoxProps, } from '@/types';
+import { client, COLLECTION_ID_MESSAGES, DATABASE_ID, COLLECTION_ID_TYPING, account } from '@/appwrite/config';
+import type { Message, User, MessageBoxProps, AppwriteRealtimeResponse, TypingStatusDocument } from '@/types';
 import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { EditDialog } from './EditDialog';
-import { GetAllMessages, deleteMessage, submitMessage, updateMessage } from '@/appwrite/actions';
+import { GetAllMessages, deleteMessage, submitMessage, updateMessage, setTypingStatus } from '@/appwrite/actions';
 import { MessageSquare } from 'lucide-react';
 
 export const MessageBox = ({ selectedUser }: MessageBoxProps) => {
@@ -13,6 +13,9 @@ export const MessageBox = ({ selectedUser }: MessageBoxProps) => {
     const [messageToDelete, setMessageToDelete] = useState<Message | null>(null);
     const [currentUser, setCurrentUser] = useState<User | null>(null);
     const messagesEndRef = useRef<HTMLDivElement>(null);
+    const [isTyping, setIsTyping] = useState(false);
+    const typingTimeoutRef = useRef<NodeJS.Timeout>();
+    const lastTypingUpdate = useRef<number>(0);
 
     const { data: messages = [], isLoading: isLoadingMessages, refetch: refetchMessages } = useQuery({
         queryKey: ['messages', selectedUser?.$id],
@@ -41,7 +44,6 @@ export const MessageBox = ({ selectedUser }: MessageBoxProps) => {
         fetchCurrentUser();
     }, []);
 
-
     useEffect(() => {
         scrollToBottom();
     }, [messages]);
@@ -60,6 +62,32 @@ export const MessageBox = ({ selectedUser }: MessageBoxProps) => {
             unsubscribe();
         };
     }, [refetchMessages]);
+
+    useEffect(() => {
+        if (!selectedUser || !currentUser) return;
+
+        const unsubscribe = client.subscribe<AppwriteRealtimeResponse<TypingStatusDocument>>(
+            [`databases.${DATABASE_ID}.collections.${COLLECTION_ID_TYPING}.documents`],
+            (response) => {
+                // Check if this is a create or update event
+                if (response.events.includes('databases.*.collections.*.documents.*.create') ||
+                    response.events.includes('databases.*.collections.*.documents.*.update')) {
+
+                    const typingData = response.payload as unknown as TypingStatusDocument;
+                    // Show typing status only when we're the receiver
+                    if (typingData.receiverId === currentUser.$id &&
+                        typingData.senderId === selectedUser.$id) {
+                        console.log('Updating typing status for receiver to:', typingData.isTyping);
+                        setIsTyping(typingData.isTyping);
+                    }
+                }
+            }
+        );
+
+        return () => {
+            unsubscribe();
+        };
+    }, [selectedUser, currentUser]);
 
     const handleDeleteMessage = async () => {
         if (!messageToDelete) return;
@@ -118,7 +146,6 @@ export const MessageBox = ({ selectedUser }: MessageBoxProps) => {
         setShowMessageEditDialog(true);
     };
 
-    // Add this function to handle message updates
     const handleEditMessage = async (content: string) => {
         if (!messageToEdit) return;
         try {
@@ -133,6 +160,45 @@ export const MessageBox = ({ selectedUser }: MessageBoxProps) => {
                 description: "Please try again"
             });
         }
+    };
+
+    const handleTyping = async () => {
+        if (!selectedUser || !currentUser) return;
+
+        const now = Date.now();
+        if (now - lastTypingUpdate.current < 1000) {
+            return;
+        }
+        lastTypingUpdate.current = now;
+
+        try {
+            console.log('Sending typing status:', {
+                senderId: currentUser.$id,
+                receiverId: selectedUser.$id,
+                isTyping: true
+            });
+            await setTypingStatus(currentUser.$id, selectedUser.$id, true);
+        } catch (error) {
+            console.error('Error sending typing status:', error);
+        }
+
+        if (typingTimeoutRef.current) {
+            clearTimeout(typingTimeoutRef.current);
+        }
+
+        typingTimeoutRef.current = setTimeout(async () => {
+            try {
+                console.log('Clearing typing status');
+                await setTypingStatus(currentUser.$id, selectedUser.$id, false);
+            } catch (error) {
+                console.error('Error clearing typing status:', error);
+            }
+        }, 2000);
+    };
+
+    const handleMessageChange = (message: string) => {
+        setNewMessage(message);
+        handleTyping();
     };
 
     if (!selectedUser) {
@@ -174,7 +240,7 @@ export const MessageBox = ({ selectedUser }: MessageBoxProps) => {
         return (
             <div className='w-full flex flex-col m-2'>
                 <div className="rounded-xl border bg-card text-card-foreground shadow h-[98vh] flex flex-col">
-                    <MessageHeader user={selectedUser} />
+                    <MessageHeader user={selectedUser} isTyping={isTyping} />
                     <div className="flex-1 flex items-center justify-center p-6">
                         <div className="flex flex-col items-center space-y-6 max-w-md text-center">
                             <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center">
@@ -190,7 +256,7 @@ export const MessageBox = ({ selectedUser }: MessageBoxProps) => {
                     </div>
                     <MessageInput
                         newMessage={newMessage}
-                        onMessageChange={setNewMessage}
+                        onMessageChange={handleMessageChange}
                         onSubmit={handleSubmit}
                     />
                 </div>
@@ -203,7 +269,7 @@ export const MessageBox = ({ selectedUser }: MessageBoxProps) => {
             <div className="rounded-xl border bg-card text-card-foreground shadow h-[98vh] flex flex-col">
                 {selectedUser && (
                     <>
-                        <MessageHeader user={selectedUser} />
+                        <MessageHeader user={selectedUser} isTyping={isTyping} />
                         <MessageList
                             messages={messages}
                             selectedUser={selectedUser}
@@ -217,7 +283,7 @@ export const MessageBox = ({ selectedUser }: MessageBoxProps) => {
                 )}
                 <MessageInput
                     newMessage={newMessage}
-                    onMessageChange={setNewMessage}
+                    onMessageChange={handleMessageChange}
                     onSubmit={handleSubmit}
                 />
                 <EditDialog

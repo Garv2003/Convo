@@ -6,6 +6,7 @@ export type User = {
     email: string;
     status: 'online' | 'offline';
     lastSeen: string;
+    isTyping?: boolean;
 }
 
 export interface Message {
@@ -14,6 +15,46 @@ export interface Message {
     senderId: string;
     receiverId: string;
     createdAt: string;
+}
+
+export interface TypingStatus {
+    $id: string;
+    senderId: string;
+    receiverId: string;
+    isTyping: boolean;
+    createdAt: string;
+}
+
+export interface AppwriteRealtimeResponse<T> {
+    events: string[];
+    channels: string[];
+    timestamp: number;
+    payload: T;
+}
+
+export interface TypingStatusDocument {
+    $id: string;
+    $collectionId: string;
+    $databaseId: string;
+    $createdAt: string;
+    $updatedAt: string;
+    $permissions: string[];
+    senderId: string;
+    receiverId: string;
+    isTyping: boolean;
+    createdAt: string;
+}
+
+export interface TypingStatusResponse {
+    $id: string;
+    $createdAt: string;
+    $updatedAt: string;
+    $permissions: string[];
+    $databaseId: string;
+    $collectionId: string;
+    senderId: string;
+    receiverId: string;
+    isTyping: boolean;
 }
 
 export type SearchBarProps = {
@@ -32,6 +73,7 @@ export type MessageBoxProps = {
 
 export type MessageHeaderProps = {
     user: User;
+    isTyping?: boolean;
 }
 
 export type UserItemProps = {

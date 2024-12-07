@@ -1,4 +1,4 @@
-import { account, DATABASE_ID, COLLECTION_ID_USERS, COLLECTION_ID_MESSAGES, databases, ID, Query } from '@/appwrite/config';
+import { account, DATABASE_ID, COLLECTION_ID_USERS, COLLECTION_ID_MESSAGES, databases, ID, Query, COLLECTION_ID_TYPING } from '@/appwrite/config';
 import type { User } from '@/types';
 
 export const updateUserStatus = async () => {
@@ -241,3 +241,69 @@ export const updateMessage = async (messageId: string, content: string) => {
         throw error;
     }
 }
+
+export const setTypingStatus = async (senderId: string, receiverId: string, isTyping: boolean): Promise<void> => {
+    try {
+        const typingDocId = `t${senderId.slice(-15)}${receiverId.slice(-15)}`;
+        const typingData = {
+            senderId,
+            receiverId,
+            isTyping,
+            createdAt: new Date().toISOString(),
+        };
+
+        try {
+            await databases.updateDocument(
+                DATABASE_ID,
+                COLLECTION_ID_TYPING,
+                typingDocId,
+                typingData
+            );
+        } catch (error: any) {
+            if (error?.code === 404) {
+                await databases.createDocument(
+                    DATABASE_ID,
+                    COLLECTION_ID_TYPING,
+                    typingDocId,
+                    typingData
+                );
+            } else {
+                throw error;
+            }
+        }
+    } catch (error) {
+        console.error('Error setting typing status:', error);
+        throw error;
+    }
+};
+
+export const deleteTypingStatus = async (typingId: string): Promise<void> => {
+    try {
+        await databases.deleteDocument(
+            DATABASE_ID,
+            COLLECTION_ID_TYPING,
+            typingId
+        );
+    } catch (error) {
+        console.error('Error deleting typing status:', error);
+    }
+};
+
+export const getTypingStatus = async (senderId: string, receiverId: string): Promise<boolean> => {
+    try {
+        const response = await databases.listDocuments(
+            DATABASE_ID,
+            COLLECTION_ID_TYPING,
+            [
+                Query.equal('senderId', senderId),
+                Query.equal('receiverId', receiverId),
+                Query.orderDesc('createdAt'),
+                Query.limit(1)
+            ]
+        );
+        return response.documents.length > 0 ? response.documents[0].isTyping : false;
+    } catch (error) {
+        console.error('Error getting typing status:', error);
+        return false;
+    }
+};
