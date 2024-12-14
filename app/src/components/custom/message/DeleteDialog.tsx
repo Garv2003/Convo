@@ -10,7 +10,6 @@ import {
 } from "@/components/ui";
 import type { DeleteDialogProps } from "@/types";
 
-
 export const DeleteDialog = ({ isOpen, onClose, onConfirm }: DeleteDialogProps) => {
     return (
         <AlertDialog open={isOpen} onOpenChange={onClose}>

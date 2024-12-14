@@ -1,8 +1,6 @@
 import { MessageHeaderProps } from "@/types";
 
 export const MessageHeader = ({ user, isTyping }: MessageHeaderProps) => {
-    console.log(user, isTyping);    
-
     return (
         <div className="space-y-1.5 p-6 flex flex-row items-center border-b">
             <div className="flex items-center space-x-4">

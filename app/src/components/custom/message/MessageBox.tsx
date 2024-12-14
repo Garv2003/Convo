@@ -38,7 +38,9 @@ export const MessageBox = ({ selectedUser }: MessageBoxProps) => {
                     lastSeen: new Date().toISOString()
                 } as User);
             } catch (error) {
-                console.error('Error fetching current user:', error);
+                toast.error('Failed to fetch current user', {
+                    description: "Please try again"
+                });
             }
         };
         fetchCurrentUser();
@@ -52,7 +54,8 @@ export const MessageBox = ({ selectedUser }: MessageBoxProps) => {
         const unsubscribe = client.subscribe(
             `databases.${DATABASE_ID}.collections.${COLLECTION_ID_MESSAGES}.documents`,
             (response) => {
-                if (response.events.includes('databases.*.collections.*.documents.*.create')) {
+                if (response.events.includes('databases.*.collections.*.documents.*.create') ||
+                    response.events.includes('databases.*.collections.*.documents.*.update')) {
                     refetchMessages();
                 }
             }
@@ -97,7 +100,6 @@ export const MessageBox = ({ selectedUser }: MessageBoxProps) => {
             await refetchMessages();
             toast.success('Message deleted successfully');
         } catch (error) {
-            console.error('Error deleting message:', error);
             toast.error('Failed to delete message', {
                 description: "Please try again"
             });
@@ -172,14 +174,11 @@ export const MessageBox = ({ selectedUser }: MessageBoxProps) => {
         lastTypingUpdate.current = now;
 
         try {
-            console.log('Sending typing status:', {
-                senderId: currentUser.$id,
-                receiverId: selectedUser.$id,
-                isTyping: true
-            });
             await setTypingStatus(currentUser.$id, selectedUser.$id, true);
         } catch (error) {
-            console.error('Error sending typing status:', error);
+            toast.error('Failed to send typing status', {
+                description: "Please try again"
+            });
         }
 
         if (typingTimeoutRef.current) {
@@ -188,10 +187,11 @@ export const MessageBox = ({ selectedUser }: MessageBoxProps) => {
 
         typingTimeoutRef.current = setTimeout(async () => {
             try {
-                console.log('Clearing typing status');
                 await setTypingStatus(currentUser.$id, selectedUser.$id, false);
             } catch (error) {
-                console.error('Error clearing typing status:', error);
+                toast.error('Failed to clear typing status', {
+                    description: "Please try again"
+                });
             }
         }, 2000);
     };
