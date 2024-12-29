@@ -1,7 +1,7 @@
 const { app, BrowserWindow, protocol, Menu } = require('electron');
 const path = require('path');
-const dotenv = require('dotenv');
-dotenv.config();
+// const dotenv = require('dotenv');
+// dotenv.config();
 
 const isDev = process.env.NODE_ENV === 'development';
 

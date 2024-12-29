@@ -51,8 +51,7 @@ export const MessageBox = () => {
         const unsubscribe = client.subscribe(
             `databases.${DATABASE_ID}.collections.${COLLECTION_ID_MESSAGES}.documents`,
             (response: AppwriteRealtimeResponse<Message>) => {
-                if (response.events.includes('databases.*.collections.*.documents.*.create') ||
-                    response.events.includes('databases.*.collections.*.documents.*.update')) {
+                if (response.events.includes('databases.*.collections.*.documents.*.create')) {
                     const { senderId, receiverId, $id, content, createdAt, fileId, fileName, fileType, fileUrl, fileMineType, messageType } = response.payload;
 
                     if ((senderId === selectedUser?.$id && receiverId === currentUser?.$id) ||
@@ -74,6 +73,9 @@ export const MessageBox = () => {
                             }
                         ]);
                     }
+                }
+                if (response.events.includes('databases.*.collections.*.documents.*.update')) {
+                    refetchMessages();
                 }
             }
         );

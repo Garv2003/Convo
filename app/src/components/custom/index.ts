@@ -13,6 +13,7 @@ import { UserItem } from "./user/UserItem";
 import { UserNav } from "./user/UserNav";
 
 import { FilePreview } from "./File/FilePreview";
+import { FilePreviewFull } from "./File/FilePreviewFull";
 
 export {
     SideMessageView,
@@ -27,5 +28,6 @@ export {
     UserList,
     UserItem,
     UserNav,
-    FilePreview
+    FilePreview,
+    FilePreviewFull
 }

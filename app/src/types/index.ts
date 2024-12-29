@@ -139,3 +139,14 @@ export type MessageItemProps = {
     onDelete: (message: Message) => void;
     onEdit?: (event: React.MouseEvent<HTMLDivElement>, message: Message) => void;
 }
+
+export type FilePreviewFullProps = {
+    file: {
+        name: string;
+        type: string;
+        url: string;
+    };
+    onClose: () => void;
+    onDownload?: () => void;
+    open: boolean;
+}

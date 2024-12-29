@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { useState, useCallback } from "react";
 import { MessageItemProps } from "@/types";
+import { FilePreviewFull } from "@/components/custom";
 
 export const MessageItem = ({
     message,
@@ -23,6 +24,7 @@ export const MessageItem = ({
 }: MessageItemProps) => {
     const [isOpen, setIsOpen] = useState(false);
     const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0 });
+    const [previewOpen, setPreviewOpen] = useState(false);
 
     const handleContextMenu = useCallback((e: React.MouseEvent) => {
         e.preventDefault();
@@ -34,15 +36,15 @@ export const MessageItem = ({
         (e: React.MouseEvent) => {
             e.stopPropagation();
             if (message.fileUrl) {
-                window.open(message.fileUrl, "_blank");
+                setPreviewOpen(true);
+                // window.open(message.fileUrl, "_blank");
             }
         },
         [message.fileUrl]
     );
 
     const handleDownload = useCallback(
-        async (e: React.MouseEvent) => {
-            e.stopPropagation();
+        async () => {
             if (message.fileUrl) {
                 try {
                     const response = await fetch(message.fileUrl);
@@ -130,6 +132,16 @@ export const MessageItem = ({
 
     return (
         <>
+            <FilePreviewFull
+                file={{
+                    name: message.fileName as string,
+                    url: message.fileUrl as string,
+                    type: message.fileType as string,
+                }}
+                onClose={() => setPreviewOpen(false)}
+                open={previewOpen}
+                onDownload={handleDownload}
+            />
             <div
                 className={`flex ${isCurrentUser ? "justify-end" : "justify-start"}`}
                 onContextMenu={handleContextMenu}
