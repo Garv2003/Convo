@@ -1,14 +1,24 @@
 import { useQuery } from '@tanstack/react-query';
-import { account } from '@/appwrite/config';
+import { account, type Models } from '@/appwrite/config';
 import { updateUserStatus } from '@/appwrite/actions';
-import { Models } from 'appwrite';
+import { userStore } from '@/store/userStore';
 
 export const useAuth = () => {
+    const { setUser } = userStore();
+
     const { data: user, isLoading, error } = useQuery<Models.User<Models.Preferences>>({
         queryKey: ['user'],
         queryFn: async () => {
             await updateUserStatus();
-            return await account.get();
+            const currentUser = await account.get();
+            setUser({
+                $id: currentUser.$id,
+                name: currentUser.name,
+                email: currentUser.email,
+                status: 'online',
+                lastSeen: new Date().toISOString()
+            });
+            return currentUser;
         },
         retry: false,
     });

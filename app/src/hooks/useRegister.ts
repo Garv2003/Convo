@@ -1,9 +1,9 @@
 import { useNavigate } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
-import { z } from "zod";
-import { toast } from "sonner";
-import { registerSchema } from "@/schema";
 import { registerAction } from "@/appwrite/actions";
+import { registerSchema } from "@/schema";
+import { toast } from "sonner";
+import { z } from "zod";
 
 export const useRegister = () => {
     const navigate = useNavigate();
@@ -18,8 +18,7 @@ export const useRegister = () => {
             });
             navigate("/login");
         },
-        onError: (error) => {
-            console.error('Registration error:', error);
+        onError: () => {
             toast.error("Account creation failed!", {
                 description: "Please try again"
             });

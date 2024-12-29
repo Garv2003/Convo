@@ -9,12 +9,12 @@ import {
     Label,
     Input
 } from "@/components/ui";
-import { Link } from "react-router-dom";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { registerSchema } from "@/schema";
 import { useRegister } from "@/hooks/useRegister";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { registerSchema } from "@/schema";
+import { Link } from "react-router-dom";
+import { z } from "zod";
 
 export function Register() {
     const { register, handleSubmit, formState: { errors } } = useForm<z.infer<typeof registerSchema>>({

@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { selectedUserStore } from "@/store/selectedUserStore";
 import { User } from '@/types';
 
 export const useUserManagement = () => {
-    const [selectedUser, setSelectedUser] = useState<User | null>(null);
+    const { selectedUser, setSelectedUser } = selectedUserStore();
 
     const handleUserSelect = (user: User) => {
         setSelectedUser({

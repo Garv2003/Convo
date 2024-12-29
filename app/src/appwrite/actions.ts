@@ -1,4 +1,4 @@
-import { account, DATABASE_ID, COLLECTION_ID_USERS, COLLECTION_ID_MESSAGES, databases, ID, Query, COLLECTION_ID_TYPING } from '@/appwrite/config';
+import { account, DATABASE_ID, COLLECTION_ID_USERS, COLLECTION_ID_MESSAGES, databases, ID, Query, COLLECTION_ID_TYPING, storage, STORAGE_BUCKET_ID } from '@/appwrite/config';
 import type { User } from '@/types';
 
 export const updateUserStatus = async () => {
@@ -92,7 +92,7 @@ export const registerAction = async (email: string, password: string, name: stri
     }
 }
 
-export const fetchAllUsers = async (selectedUser: User | null, onUserSelect: (user: User) => void) => {
+export const fetchAllUsers = async (selectedUser: User | null, setSelectedUser: (user: User) => void) => {
     try {
         const currentUser = await account.get();
         const response = await databases.listDocuments(
@@ -105,7 +105,7 @@ export const fetchAllUsers = async (selectedUser: User | null, onUserSelect: (us
         if (selectedUser) {
             const currentUser = response.documents.find(doc => doc.$id === selectedUser.$id);
             if (currentUser) {
-                onUserSelect({
+                setSelectedUser({
                     $id: currentUser.$id,
                     name: currentUser.name,
                     email: currentUser.email,
@@ -157,7 +157,10 @@ export const updateUsersStatus = async () => {
     await Promise.all(updates);
 };
 
-export const GetAllMessages = async (selectedUser: User) => {
+export const GetAllMessages = async (selectedUser: User | null) => {
+
+    if (!selectedUser) return [];
+
     try {
         const currentUser = await account.get();
         const response = await databases.listDocuments(
@@ -206,14 +209,19 @@ export const deleteMessage = async (messageId: string) => {
     }
 }
 
-export const submitMessage = async (content: string, selectedUser: User) => {
+export const submitMessage = async ({ fileId, fileName, fileType, fileUrl, fileMineType, content, messageType, selectedUser, currentUser }: { fileId: string | null, fileName: string | null, fileType: string | null, fileUrl: string | null, fileMineType: string | null, content: string | null, messageType: string, selectedUser: User, currentUser: User }) => {
     try {
-        const currentUser = await account.get();
         await databases.createDocument(
             DATABASE_ID,
             COLLECTION_ID_MESSAGES,
             ID.unique(),
             {
+                fileId: fileId,
+                fileName: fileName,
+                fileType: fileType,
+                fileUrl: fileUrl,
+                fileMineType: fileMineType,
+                messageType: messageType,
                 content: content,
                 senderId: currentUser.$id,
                 receiverId: selectedUser.$id,
@@ -306,4 +314,28 @@ export const getTypingStatus = async (senderId: string, receiverId: string): Pro
         console.error('Error getting typing status:', error);
         return false;
     }
+};
+
+
+export const uploadFile = async (file: File) => {
+    try {
+        const fileDetails = await storage.createFile(STORAGE_BUCKET_ID, ID.unique(), file);
+        return fileDetails;
+    } catch (error) {
+        throw new Error('File upload failed');
+    }
+};
+
+export const getFileUrl = async (fileId: string) => {
+    const file = await storage.getFileView(STORAGE_BUCKET_ID, fileId);
+    return file;
+};
+
+export const downloadFile = async (fileId: string) => {
+    const file = await storage.getFileDownload(STORAGE_BUCKET_ID, fileId);
+    return file;
+};
+
+export const deleteFile = async (fileId: string) => {
+    await storage.deleteFile(STORAGE_BUCKET_ID, fileId);
 };

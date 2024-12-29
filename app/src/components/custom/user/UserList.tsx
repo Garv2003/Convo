@@ -1,12 +1,11 @@
-import { useState } from 'react';
-import { UserListProps } from '@/types';
-import { useUsers, useUserStatus } from '@/hooks';
 import { SearchBar, UserItem } from '@/components/custom';
-import '@/styles/scrollbar.css';
+import { useUsers, useUserStatus } from '@/hooks';
+import { useState } from 'react';
 
-export const UserList = ({ onUserSelect, selectedUser }: UserListProps) => {
+export const UserList = () => {
     const [searchQuery, setSearchQuery] = useState('');
-    const { users, isLoading } = useUsers(selectedUser, onUserSelect);
+    const { users, isLoading } = useUsers();
+
     useUserStatus();
 
     const filteredUsers = users.filter(
@@ -35,13 +34,14 @@ export const UserList = ({ onUserSelect, selectedUser }: UserListProps) => {
                                 <p className="text-sm text-muted-foreground">Loading users...</p>
                             </div>
                         ) : filteredUsers.length === 0 ? (
-                            <p className="text-sm text-muted-foreground text-center">No users found</p>
+                            <div className='h-full flex flex-col items-center justify-center min-h-[80vh] py-8'>
+                                <p className="text-sm text-muted-foreground text-center">No users found</p>
+                            </div>
                         ) : (
                             filteredUsers.map((user) => (
                                 <UserItem
                                     key={user.$id}
                                     user={user}
-                                    onClick={onUserSelect}
                                 />
                             ))
                         )}

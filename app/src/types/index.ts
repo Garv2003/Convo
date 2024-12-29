@@ -9,12 +9,28 @@ export type User = {
     isTyping?: boolean;
 }
 
+export type UserState = {
+    user: User | null;
+    setUser: (user: User) => void;
+}
+
+export type selectedUserState = {
+    selectedUser: User | null;
+    setSelectedUser: (user: User) => void;
+}
+
 export interface Message {
     $id: string;
-    content: string;
+    content?: string;
     senderId: string;
     receiverId: string;
     createdAt: string;
+    fileUrl?: string;
+    fileType?: string;
+    fileName?: string;
+    fileId?: string;
+    fileMineType?: string;
+    messageType?: string;
 }
 
 export interface TypingStatus {
@@ -62,15 +78,6 @@ export type SearchBarProps = {
     onChange: (value: string) => void;
 }
 
-export type UserListProps = {
-    onUserSelect: (user: User) => void;
-    selectedUser: User | null;
-}
-
-export type MessageBoxProps = {
-    selectedUser: User | null;
-}
-
 export type MessageHeaderProps = {
     user: User;
     isTyping?: boolean;
@@ -78,15 +85,6 @@ export type MessageHeaderProps = {
 
 export type UserItemProps = {
     user: User;
-    onClick: (user: User) => void;
-}
-
-export type MessageItemProps = {
-    message: Message;
-    isCurrentUser: boolean;
-    onCopy: (content: string) => void;
-    onDelete: (message: Message) => void;
-    onEdit?: (event: React.MouseEvent<HTMLDivElement>, message: Message) => void;
 }
 
 export type MessageListProps = {
@@ -117,4 +115,27 @@ export type MessageInputProps = {
     newMessage: string;
     onMessageChange: (message: string) => void;
     onSubmit: (e: FormEvent) => void;
+    onEmojiButtonClick: () => void;
+    onEmojiClose: () => void;
+    showEmojiPicker: boolean;
+    fileInfo: FileData | null;
+    onFileChange: (fileData: FileData | null) => void;
+    fileLoading: boolean;
+    setFileLoading: (value: boolean) => void;
+}
+
+export type FileData = {
+    $id: string;
+    mimeType: string;
+    name: string;
+    type: string;
+    url: string;
+};
+
+export type MessageItemProps = {
+    message: Message;
+    isCurrentUser: boolean;
+    onCopy: (content: string) => void;
+    onDelete: (message: Message) => void;
+    onEdit?: (event: React.MouseEvent<HTMLDivElement>, message: Message) => void;
 }

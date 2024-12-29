@@ -1,14 +1,15 @@
-import { UserNav, UserList, MessageBox } from '@/components/custom';
-import { useUserManagement } from '@/hooks/useUserManagement';
+import { UserNav, UserList, MessageBox, SideMessageView } from '@/components/custom';
+import { selectedUserStore } from '@/store/selectedUserStore';
 import '@/styles/scrollbar.css';
 
 export const Home = () => {
-    const { selectedUser, handleUserSelect } = useUserManagement();
+    const { selectedUser } = selectedUserStore();
+
     return (
         <div className='w-full flex flex-row'>
             <UserNav />
-            <UserList onUserSelect={handleUserSelect} selectedUser={selectedUser} />
-            <MessageBox selectedUser={selectedUser} />
+            <UserList />
+            {selectedUser ? <MessageBox /> : <SideMessageView />}
         </div>
     );
 };

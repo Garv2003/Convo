@@ -1,16 +1,14 @@
-import { useEffect } from 'react';
-import { useQuery } from '@tanstack/react-query';
 import { DATABASE_ID, COLLECTION_ID_USERS, client } from '@/appwrite/config';
-import { User } from '@/types';
+import { selectedUserStore } from '@/store/selectedUserStore';
 import { fetchAllUsers } from '@/appwrite/actions';
+import { useQuery } from '@tanstack/react-query';
+import { useEffect } from 'react';
 
-export const useUsers = (selectedUser: User | null, onUserSelect: (user: User) => void) => {
+export const useUsers = () => {
+    const { setSelectedUser, selectedUser } = selectedUserStore();
     const { data: users = [], isLoading, refetch: refetchUsers } = useQuery({
         queryKey: ['users'],
-        queryFn: async () => {
-            return await fetchAllUsers(selectedUser, onUserSelect);
-        },
-        refetchInterval: 10000,
+        queryFn: () => fetchAllUsers(selectedUser, setSelectedUser),
     });
 
     useEffect(() => {
